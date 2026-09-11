@@ -1,0 +1,64 @@
+rules_version = '2';
+
+// ============================================================
+// قواعد أمان Firestore لتطبيق "أبو أروى"
+// انسخ هذا الملف بالكامل والصقه في:
+// Firebase Console > Firestore Database > Rules > انسخ والصق > Publish
+// ============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // دالة مساعدة: هل المستخدم الحالي مسجل دخول؟
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // دالة مساعدة: هل المستخدم الحالي هو Admin؟
+    // تتحقق من وثيقة المستخدم في users/{uid} وتتأكد أن role == 'admin'
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // دالة مساعدة: هل المستخدم نشط (غير موقوف)؟
+    function isActiveUser() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isActive == true;
+    }
+
+    // ----------- المنتجات -----------
+    // القراءة: أي مستخدم مسجل دخول ونشط (مدير أو موظف)
+    // الكتابة (إضافة/تعديل/حذف): المدير فقط
+    match /products/{productId} {
+      allow read: if isSignedIn() && isActiveUser();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ----------- الأقسام -----------
+    match /categories/{categoryId} {
+      allow read: if isSignedIn() && isActiveUser();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ----------- سجل تغييرات الأسعار -----------
+    // يُسمح بالقراءة للمدير فقط، والكتابة أيضًا للمدير فقط
+    // (السجل يُنشأ تلقائيًا من الكود عند كل تعديل سعر بواسطة المدير)
+    match /priceLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if false; // السجل لا يُعدَّل أو يُحذف أبدًا
+    }
+
+    // ----------- المستخدمون -----------
+    // كل مستخدم يقدر يقرأ بياناته الخاصة فقط
+    // المدير يقدر يقرأ ويعدّل كل المستخدمين (تفعيل/إيقاف/تعديل الصلاحيات)
+    // لا أحد (ولا حتى الموظف نفسه) يقدر يعدّل الـ role الخاص به لنفسه
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}

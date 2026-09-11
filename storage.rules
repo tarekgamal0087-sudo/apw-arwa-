@@ -1,0 +1,28 @@
+rules_version = '2';
+
+// ============================================================
+// قواعد أمان Firebase Storage لتطبيق "أبو أروى"
+// انسخ هذا الملف بالكامل والصقه في:
+// Firebase Console > Storage > Rules > انسخ والصق > Publish
+// ============================================================
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // صور المنتجات: أي مستخدم مسجل دخول يقدر يشوفها
+    // رفع/تعديل/حذف الصور: المدير فقط
+    match /product_images/{imageId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

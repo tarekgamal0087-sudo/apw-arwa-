@@ -1,0 +1,3 @@
+# Flutter writes the real SDK path here automatically. Do not commit local.properties.
+# Example on Windows:
+# flutter.sdk=C:\\src\\flutter

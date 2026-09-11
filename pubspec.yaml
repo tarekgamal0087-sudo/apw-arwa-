@@ -1,0 +1,48 @@
+name: abu_arwa
+description: "تطبيق أبو أروى لإدارة أسعار ومنتجات المحل"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+  # Firebase
+  firebase_core: ^2.32.0
+  firebase_auth: ^4.20.0
+  cloud_firestore: ^4.17.5
+  firebase_storage: ^11.7.7
+
+  # State Management
+  provider: ^6.1.2
+
+  # Local caching / Offline
+  connectivity_plus: ^5.0.2
+  cached_network_image: ^3.3.1
+
+  # UI / Utils
+  google_fonts: ^6.2.1
+  intl: ^0.19.0
+  image_picker: ^1.1.2
+  flutter_svg: ^2.0.10+1
+  shared_preferences: ^2.2.3
+  uuid: ^4.4.0
+  fluttertoast: ^8.2.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
+  # بعد ما ترفع ملف اللوجو، هيتحط في assets/images/logo.png
+  # وهيتفعل استخدام خط عربي احترافي هنا لاحقًا لو حبيت (مثلاً Cairo أو Tajawal)
